@@ -17,7 +17,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / ".env")
 ADMIN_PASSCODE = os.getenv("ADMIN_PASSCODE")
 
-mongo_url = os.getenv("MONGO_URL")
+mongo_url = os.getenv("MONGO_URI")
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.getenv("DB_NAME")]
 
@@ -280,15 +280,15 @@ async def drop_collection(collection: str, x_admin_passcode: str = Header(None))
 # ------------------------------
 # APP CONFIG
 # ------------------------------
-app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["*"],  # or ["http://localhost:3000"]
     allow_credentials=True,
-    allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(api_router)
 
 logging.basicConfig(level=logging.INFO)
 
