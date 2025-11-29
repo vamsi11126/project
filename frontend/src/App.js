@@ -10,6 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, BookOpen, Calculator, MessageSquare, GraduationCap, Download, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
+import AdminLogin from "./admin/AdminLogin";
+import AdminDashboard from "./admin/AdminDashboard";
+import ManagePapers from "./admin/ManagePapers";
+import ManageMaterials from "./admin/ManageMaterials";
+import ManageRequests from "./admin/ManageRequests";
+
+import ProtectedRoute from "./admin/components/ProtectedRoute";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -290,8 +297,8 @@ const Materials = () => {
 
 const fetchSubjects = async () => {
   try {
-    const response = await axios.get(`${API}/subjects`);
-    setSubjects(response.data);  // full subject list
+    const response = await axios.get(`${API}/material-subjects`);
+    setSubjects(response.data.subjects); 
   } catch (error) {
     console.error("Error fetching subjects:", error);
   }
@@ -302,7 +309,10 @@ const fetchSubjects = async () => {
     setLoading(true);
     try {
       const params = {};
-      if (selectedSubject) params.subject = selectedSubject;
+      if (selectedSubject && selectedSubject !== "__all__") {
+        params.subject = selectedSubject;
+      }
+
 
       const response = await axios.get(`${API}/materials`, { params });
       setMaterials(response.data);
@@ -350,7 +360,7 @@ const fetchSubjects = async () => {
               <SelectContent>
                 <SelectItem value="__all__">All Subjects</SelectItem>
                 {subjects.map((subject) => (
-                  <SelectItem key={subject.name} value={subject.name}>{subject.name}</SelectItem>
+                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -408,6 +418,7 @@ const AttendanceCalculator = () => {
     const totalNum = parseInt(total);
     const thresholdNum = parseFloat(threshold);
 
+    // VALIDATION
     if (isNaN(attendedNum) || isNaN(totalNum) || isNaN(thresholdNum)) {
       toast.error("Please enter valid numbers");
       return;
@@ -423,43 +434,43 @@ const AttendanceCalculator = () => {
       return;
     }
 
+    if (thresholdNum <= 0 || thresholdNum >= 100) {
+      toast.error("Threshold must be between 1 and 99");
+      return;
+    }
+
+    // CURRENT ATTENDANCE %
     const percentage = (attendedNum / totalNum) * 100;
 
-    // Calculate how many classes can be skipped
     let canSkip = 0;
-    let tempAttended = attendedNum;
-    let tempTotal = totalNum;
-
-    while (tempTotal < 1000) {
-      tempTotal++;
-      const newPercentage = (tempAttended / tempTotal) * 100;
-      if (newPercentage >= thresholdNum) {
-        canSkip++;
-      } else {
-        break;
-      }
-    }
-
-    // Calculate how many classes needed to reach threshold
     let needToAttend = 0;
-    if (percentage < thresholdNum) {
-      tempAttended = attendedNum;
-      tempTotal = totalNum;
-      while (tempTotal < 1000) {
-        tempTotal++;
-        tempAttended++;
-        const newPercentage = (tempAttended / tempTotal) * 100;
-        needToAttend++;
-        if (newPercentage >= thresholdNum) {
-          break;
-        }
-      }
+
+    // ⭐ SAFE CASE — calculate classes you can skip
+    if (percentage >= thresholdNum) {
+      const rawSkip = (100 * attendedNum) / thresholdNum - totalNum;
+      canSkip = Math.max(0, Math.floor(rawSkip));
     }
 
+    // ⭐ LOW ATTENDANCE — calculate required classes
+    else {
+      const denom = 1 - thresholdNum / 100;
+
+      if (denom <= 0) {
+        toast.error("Threshold must be less than 100");
+        return;
+      }
+
+      const rawNeed =
+        ((thresholdNum * totalNum) / 100 - attendedNum) / denom;
+
+      needToAttend = Math.max(0, Math.ceil(rawNeed));
+    }
+
+    // FINAL RESULT OBJECT
     setResult({
       percentage: percentage.toFixed(2),
-      canSkip: percentage >= thresholdNum ? canSkip : 0,
-      needToAttend: percentage < thresholdNum ? needToAttend : 0,
+      canSkip,
+      needToAttend,
       status: percentage >= thresholdNum ? "safe" : "warning"
     });
   };
@@ -475,7 +486,9 @@ const AttendanceCalculator = () => {
     <div className="page-container">
       <div className="page-header">
         <h1 className="page-title" data-testid="calculator-title">Attendance Calculator</h1>
-        <p className="page-description" data-testid="calculator-description">Calculate your attendance percentage and find out how many classes you can skip</p>
+        <p className="page-description" data-testid="calculator-description">
+          Calculate your attendance percentage and find out how many classes you can skip
+        </p>
       </div>
 
       <div className="calculator-section">
@@ -493,9 +506,9 @@ const AttendanceCalculator = () => {
                   placeholder="e.g., 45"
                   value={attended}
                   onChange={(e) => setAttended(e.target.value)}
-                  data-testid="input-attended"
                 />
               </div>
+
               <div className="form-group">
                 <Label htmlFor="total">Total Classes</Label>
                 <Input
@@ -504,9 +517,9 @@ const AttendanceCalculator = () => {
                   placeholder="e.g., 60"
                   value={total}
                   onChange={(e) => setTotal(e.target.value)}
-                  data-testid="input-total"
                 />
               </div>
+
               <div className="form-group">
                 <Label htmlFor="threshold">Minimum Required Attendance (%)</Label>
                 <Input
@@ -515,14 +528,14 @@ const AttendanceCalculator = () => {
                   placeholder="e.g., 75"
                   value={threshold}
                   onChange={(e) => setThreshold(e.target.value)}
-                  data-testid="input-threshold"
                 />
               </div>
+
               <div className="form-actions">
-                <Button onClick={calculate} className="calc-btn" data-testid="calculate-btn">
+                <Button onClick={calculate} className="calc-btn">
                   Calculate
                 </Button>
-                <Button onClick={reset} variant="outline" data-testid="reset-btn">
+                <Button onClick={reset} variant="outline">
                   Reset
                 </Button>
               </div>
@@ -531,39 +544,42 @@ const AttendanceCalculator = () => {
         </Card>
 
         {result && (
-          <Card className={`result-card ${result.status}`} data-testid="result-card">
+          <Card className={`result-card ${result.status}`}>
             <CardHeader>
               <CardTitle>Your Attendance Report</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="result-grid">
+
                 <div className="result-item">
                   <div className="result-label">Current Attendance</div>
-                  <div className={`result-value ${result.status}`} data-testid="result-percentage">
+                  <div className={`result-value ${result.status}`}>
                     {result.percentage}%
                   </div>
                 </div>
+
                 {result.status === "safe" ? (
                   <div className="result-item">
                     <div className="result-label">Classes You Can Skip</div>
-                    <div className="result-value safe" data-testid="result-can-skip">
+                    <div className="result-value safe">
                       {result.canSkip} classes
                     </div>
                   </div>
                 ) : (
                   <div className="result-item">
                     <div className="result-label">Classes Needed to Attend</div>
-                    <div className="result-value warning" data-testid="result-need-attend">
+                    <div className="result-value warning">
                       {result.needToAttend} classes
                     </div>
                   </div>
                 )}
-                <div className="result-message" data-testid="result-message">
-                  {result.status === "safe" 
+
+                <div className="result-message">
+                  {result.status === "safe"
                     ? `Great! Your attendance is above ${threshold}%. You can skip up to ${result.canSkip} classes without falling below the threshold.`
-                    : `Warning! Your attendance is below ${threshold}%. You need to attend at least ${result.needToAttend} consecutive classes to reach the required threshold.`
-                  }
+                    : `Warning! Your attendance is below ${threshold}%. You need to attend at least ${result.needToAttend} consecutive classes to reach the required threshold.`}
                 </div>
+
               </div>
             </CardContent>
           </Card>
@@ -572,6 +588,7 @@ const AttendanceCalculator = () => {
     </div>
   );
 };
+
 
 const RequestForm = () => {
   const [formData, setFormData] = useState({
@@ -694,16 +711,60 @@ function App() {
     <div className="App">
       <BrowserRouter>
         <Navigation />
+
         <Routes>
+
+          {/* USER ROUTES */}
           <Route path="/" element={<Home />} />
           <Route path="/papers" element={<Papers />} />
           <Route path="/materials" element={<Materials />} />
           <Route path="/calculator" element={<AttendanceCalculator />} />
           <Route path="/request" element={<RequestForm />} />
+
+          {/* ADMIN ROUTES */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/papers"
+            element={
+              <ProtectedRoute>
+                <ManagePapers />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/materials"
+            element={
+              <ProtectedRoute>
+                <ManageMaterials />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/requests"
+            element={
+              <ProtectedRoute>
+                <ManageRequests />
+              </ProtectedRoute>
+            }
+          />
+
         </Routes>
       </BrowserRouter>
     </div>
   );
 }
+
 
 export default App;
