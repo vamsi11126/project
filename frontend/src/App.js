@@ -15,7 +15,7 @@ import AdminDashboard from "./admin/AdminDashboard";
 import ManagePapers from "./admin/ManagePapers";
 import ManageMaterials from "./admin/ManageMaterials";
 import ManageRequests from "./admin/ManageRequests";
-
+import Footer from "./components/ui/Footer";
 import ProtectedRoute from "./admin/components/ProtectedRoute";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -761,6 +761,7 @@ function App() {
           />
 
         </Routes>
+        <Footer/>
       </BrowserRouter>
     </div>
   );
