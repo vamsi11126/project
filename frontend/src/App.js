@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, BookOpen, Calculator, MessageSquare, GraduationCap, Download, ExternalLink } from "lucide-react";
+import { FileText, BookOpen, Calculator, MessageSquare, GraduationCap, Download, ExternalLink,Menu } from "lucide-react";
 import { toast } from "sonner";
 import AdminLogin from "./admin/AdminLogin";
 import AdminDashboard from "./admin/AdminDashboard";
@@ -17,35 +17,79 @@ import ManageMaterials from "./admin/ManageMaterials";
 import ManageRequests from "./admin/ManageRequests";
 import Footer from "./components/ui/Footer";
 import ProtectedRoute from "./admin/components/ProtectedRoute";
-
+import Papers from "./pages/Papers";
+import Materials from "./pages/Materials";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
+// Replace your existing Navigation component with this:
+
 const Navigation = () => {
   const location = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
   const isActive = (path) => location.pathname === path;
+  
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
 
   return (
     <nav className="nav-bar">
       <div className="nav-container">
-        <Link to="/" className="nav-logo" data-testid="nav-logo">
+        <Link to="/" className="nav-logo" data-testid="nav-logo" onClick={closeMenu}>
           <GraduationCap className="logo-icon" />
           <span className="logo-text">Campus Toolkit</span>
         </Link>
-        <div className="nav-links">
-          <Link to="/" className={isActive("/") ? "nav-link active" : "nav-link"} data-testid="nav-home">
+        
+        {/* Mobile menu button */}
+        <button 
+          className="mobile-menu-btn" 
+          onClick={toggleMenu}
+          aria-label="Toggle menu"
+        >
+          {isMenuOpen ? <Menu size={24}  /> : <Menu size={24} />}
+        </button>
+        
+        {/* Navigation links */}
+        <div className={`nav-links ${isMenuOpen ? 'active' : ''}`}>
+          <Link 
+            to="/" 
+            className={isActive("/") ? "nav-link active" : "nav-link"} 
+            data-testid="nav-home"
+            onClick={closeMenu}
+          >
             Home
           </Link>
-          <Link to="/papers" className={isActive("/papers") ? "nav-link active" : "nav-link"} data-testid="nav-papers">
+          <Link 
+            to="/papers" 
+            className={isActive("/papers") ? "nav-link active" : "nav-link"} 
+            data-testid="nav-papers"
+            onClick={closeMenu}
+          >
             Exam Papers
           </Link>
-          <Link to="/materials" className={isActive("/materials") ? "nav-link active" : "nav-link"} data-testid="nav-materials">
+          <Link 
+            to="/materials" 
+            className={isActive("/materials") ? "nav-link active" : "nav-link"} 
+            data-testid="nav-materials"
+            onClick={closeMenu}
+          >
             Study Materials
           </Link>
-          <Link to="/calculator" className={isActive("/calculator") ? "nav-link active" : "nav-link"} data-testid="nav-calculator">
+          <Link 
+            to="/calculator" 
+            className={isActive("/calculator") ? "nav-link active" : "nav-link"} 
+            data-testid="nav-calculator"
+            onClick={closeMenu}
+          >
             Attendance
           </Link>
-          <Link to="/request" className={isActive("/request") ? "nav-link active" : "nav-link"} data-testid="nav-request">
+          <Link 
+            to="/request" 
+            className={isActive("/request") ? "nav-link active" : "nav-link"} 
+            data-testid="nav-request"
+            onClick={closeMenu}
+          >
             Request
           </Link>
         </div>
@@ -136,276 +180,6 @@ const Home = () => {
   );
 };
 
-const Papers = () => {
-  const [papers, setPapers] = useState([]);
-  const [filters, setFilters] = useState({ years: [], departments: [], subjects: [] });
-  const [selectedYear, setSelectedYear] = useState("");
-  const [selectedDept, setSelectedDept] = useState("");
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchFilters();
-    fetchPapers();
-  }, []);
-
-  useEffect(() => {
-    fetchPapers();
-  }, [selectedYear, selectedDept, selectedSubject]);
-
-  const fetchFilters = async () => {
-    try {
-      const response = await axios.get(`${API}/filters`);
-      setFilters(response.data);
-    } catch (error) {
-      console.error("Error fetching filters:", error);
-    }
-  };
-
-  const fetchPapers = async () => {
-    setLoading(true);
-    try {
-      const params = {};
-      if (selectedYear) params.year = selectedYear;
-      if (selectedDept) params.department = selectedDept;
-      if (selectedSubject) params.subject = selectedSubject;
-
-      const response = await axios.get(`${API}/papers`, { params });
-      setPapers(response.data);
-    } catch (error) {
-      console.error("Error fetching papers:", error);
-      toast.error("Failed to load exam papers");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearFilters = () => {
-    setSelectedYear("");
-    setSelectedDept("");
-    setSelectedSubject("");
-  };
-
-  return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title" data-testid="papers-title">Previous Year Exam Papers</h1>
-        <p className="page-description" data-testid="papers-description">Browse and download question papers by year, department, and subject</p>
-      </div>
-
-      <div className="filters-section">
-        <div className="filters-grid">
-          <div className="filter-group">
-            <Label htmlFor="year-filter">Year</Label>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger id="year-filter" data-testid="filter-year">
-                <SelectValue placeholder="All Years" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Years</SelectItem>
-                {filters.years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="filter-group">
-            <Label htmlFor="dept-filter">Department</Label>
-            <Select value={selectedDept} onValueChange={setSelectedDept}>
-              <SelectTrigger id="dept-filter" data-testid="filter-department">
-                <SelectValue placeholder="All Departments" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Departments</SelectItem>
-                {filters.departments.map((dept) => (
-                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="filter-group">
-            <Label htmlFor="subject-filter">Subject</Label>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger id="subject-filter" data-testid="filter-subject">
-                <SelectValue placeholder="All Subjects" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Subjects</SelectItem>
-                {filters.subjects.map((subject) => (
-                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="filter-actions">
-            <Button onClick={clearFilters} variant="outline" data-testid="clear-filters-btn">
-              Clear Filters
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="papers-grid">
-        {loading ? (
-          <div className="loading" data-testid="papers-loading">Loading papers...</div>
-        ) : papers.length === 0 ? (
-          <div className="no-results" data-testid="no-papers">No papers found with the selected filters</div>
-        ) : (
-          papers.map((paper) => (
-            <Card key={paper.id} className="paper-card" data-testid={`paper-card-${paper.id}`}>
-              <CardHeader>
-                <CardTitle className="paper-title">{paper.title}</CardTitle>
-                <CardDescription>
-                  <div className="paper-meta">
-                    <span className="meta-badge year" data-testid={`paper-year-${paper.id}`}>{paper.year}</span>
-                    <span className="meta-badge dept" data-testid={`paper-dept-${paper.id}`}>{paper.department}</span>
-                    <span className="meta-badge dept" data-testid={`paper-dept-${paper.id}`}>{paper.type}</span>
-                  </div>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="paper-subject" data-testid={`paper-subject-${paper.id}`}>{paper.subject}</p>
-                <Button className="download-btn" asChild data-testid={`download-btn-${paper.id}`}>
-                  <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer">
-                    <Download className="btn-icon" />
-                    Download PDF
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
-
-const Materials = () => {
-  const [materials, setMaterials] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchSubjects();
-    fetchMaterials();
-  }, []);
-
-  useEffect(() => {
-    fetchMaterials();
-  }, [selectedSubject]);
-
-const fetchSubjects = async () => {
-  try {
-    const response = await axios.get(`${API}/material-subjects`);
-    setSubjects(response.data.subjects); 
-  } catch (error) {
-    console.error("Error fetching subjects:", error);
-  }
-};
-
-
-  const fetchMaterials = async () => {
-    setLoading(true);
-    try {
-      const params = {};
-      if (selectedSubject && selectedSubject !== "__all__") {
-        params.subject = selectedSubject;
-      }
-
-
-      const response = await axios.get(`${API}/materials`, { params });
-      setMaterials(response.data);
-    } catch (error) {
-      console.error("Error fetching materials:", error);
-      toast.error("Failed to load study materials");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "pdf":
-        return <FileText className="type-icon" />;
-      case "drive":
-        return <ExternalLink className="type-icon" />;
-      case "link":
-        return <ExternalLink className="type-icon" />;
-      default:
-        return <BookOpen className="type-icon" />;
-    }
-  };
-
-  const getTypeBadge = (type) => {
-    const labels = { pdf: "PDF", drive: "Google Drive", link: "External Link" };
-    return labels[type] || type;
-  };
-
-  return (
-    <div className="page-container">
-      <div className="page-header">
-        <h1 className="page-title" data-testid="materials-title">Study Materials</h1>
-        <p className="page-description" data-testid="materials-description">Access notes, PDFs, and online resources organized by subject</p>
-      </div>
-
-      <div className="filters-section">
-        <div className="filters-grid single">
-          <div className="filter-group">
-            <Label htmlFor="subject-filter">Filter by Subject</Label>
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-              <SelectTrigger id="subject-filter" data-testid="materials-filter-subject">
-                <SelectValue placeholder="All Subjects" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Subjects</SelectItem>
-                {subjects.map((subject) => (
-                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      </div>
-
-      <div className="materials-grid">
-        {loading ? (
-          <div className="loading" data-testid="materials-loading">Loading materials...</div>
-        ) : materials.length === 0 ? (
-          <div className="no-results" data-testid="no-materials">No materials found</div>
-        ) : (
-          materials.map((material) => (
-            <Card key={material.id} className="material-card" data-testid={`material-card-${material.id}`}>
-              <CardHeader>
-                <div className="material-header">
-                  <div className="material-icon-wrapper">
-                    {getTypeIcon(material.type)}
-                  </div>
-                  <div>
-                    <CardTitle className="material-title">{material.title}</CardTitle>
-                    <div className="material-meta">
-                      <span className="meta-badge subject" data-testid={`material-subject-${material.id}`}>{material.subject}</span>
-                      <span className="meta-badge type" data-testid={`material-type-${material.id}`}>{getTypeBadge(material.type)}</span>
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="material-description" data-testid={`material-desc-${material.id}`}>{material.description}</p>
-                <Button className="access-btn" asChild data-testid={`access-btn-${material.id}`}>
-                  <a href={material.url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="btn-icon" />
-                    Access Resource
-                  </a>
-                </Button>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
 
 const AttendanceCalculator = () => {
   const [attended, setAttended] = useState("");

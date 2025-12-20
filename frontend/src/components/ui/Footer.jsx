@@ -22,7 +22,7 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <div className="flex items-center justify-center md:justify-start gap-3">
               <img
-                src="/college-logo.png"
+                src="/og-image.png"
                 className="w-14 h-14 rounded-xl shadow-md"
                 alt="Logo"
               />
@@ -59,12 +59,16 @@ export default function Footer() {
               Follow updates & contribute
             </p>
 
-            <div className="flex justify-center md:justify-start gap-4 text-2xl mt-4 text-[#0066b8]">
+            {/*<div className="flex justify-center md:justify-start gap-4 text-2xl mt-4 text-[#0066b8]">
               <a className="hover:text-[#004a86] transition">🐦</a>
               <a className="hover:text-[#004a86] transition">📘</a>
               <a className="hover:text-[#004a86] transition">📸</a>
               <a className="hover:text-[#004a86] transition">💼</a>
-            </div>
+            </div>*/}
+            <div className="mt-4 text-sm text-gray-700 space-y-1">
+
+              <p>Email: <a href="mailto:campus-toolkit@example.com">studentskare@gmail.com</a></p>
+              </div>
           </div>
         </div>
 
