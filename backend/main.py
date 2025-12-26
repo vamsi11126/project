@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, HTTPException, Header
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ReturnDocument
 import os
 import logging
 from pathlib import Path
@@ -40,36 +41,24 @@ async def check_admin(passcode: str):
 DRIVE_ID_REGEX = r"/d/([a-zA-Z0-9_-]+)"
 
 async def is_drive_file_public(file_id: str) -> bool:
-    """
-    Checks if a Google Drive file is publicly accessible
-    """
     test_url = f"https://drive.google.com/uc?export=download&id={file_id}"
 
     async with httpx.AsyncClient(follow_redirects=False, timeout=10) as client:
         response = await client.head(test_url)
-
-        # Redirect to login = private file
         location = response.headers.get("location", "")
         if "accounts.google.com" in location:
             return False
-
         return response.status_code in (200, 302)
 
-
 async def normalize_and_validate_drive_url(url: str) -> str:
-    """
-    Converts Google Drive links to direct download links
-    AND ensures file is public
-    """
     match = re.search(DRIVE_ID_REGEX, url)
 
     if not match:
-        return url  # Not a Drive link
+        return url
 
     file_id = match.group(1)
 
-    is_public = await is_drive_file_public(file_id)
-    if not is_public:
+    if not await is_drive_file_public(file_id):
         raise HTTPException(
             status_code=400,
             detail="Google Drive file is not public. Set access to 'Anyone with the link'."
@@ -117,29 +106,6 @@ class MaterialUpdate(BaseModel):
     url: Optional[str] = None
     description: Optional[str] = None
 
-
-class RequestSubmission(BaseModel):
-    name: str
-    email: str
-    department: str
-    details: str
-
-
-class RequestRecord(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    email: str
-    department: str
-    details: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-
-class Subject(BaseModel):
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    name: str
-    department: str
-
 # ------------------------------
 # ROOT
 # ------------------------------
@@ -158,9 +124,7 @@ async def get_papers():
 @api_router.post("/papers", response_model=Paper)
 async def add_paper(paper: Paper, x_admin_passcode: str = Header(None)):
     await check_admin(x_admin_passcode)
-
     paper.pdfUrl = await normalize_and_validate_drive_url(paper.pdfUrl)
-
     await db.papers.insert_one(paper.model_dump())
     return paper
 
@@ -175,6 +139,12 @@ async def update_paper(
 
     update_data = {k: v for k, v in paper.model_dump().items() if v is not None}
 
+    if "year" in update_data:
+        try:
+            update_data["year"] = int(update_data["year"])
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Year must be a number")
+
     if "pdfUrl" in update_data:
         update_data["pdfUrl"] = await normalize_and_validate_drive_url(update_data["pdfUrl"])
 
@@ -184,7 +154,7 @@ async def update_paper(
     result = await db.papers.find_one_and_update(
         {"id": paper_id},
         {"$set": update_data},
-        return_document=True,
+        return_document=ReturnDocument.AFTER,
         projection={"_id": 0},
     )
 
@@ -215,9 +185,7 @@ async def get_materials():
 @api_router.post("/materials", response_model=Material)
 async def add_material(material: Material, x_admin_passcode: str = Header(None)):
     await check_admin(x_admin_passcode)
-
     material.url = await normalize_and_validate_drive_url(material.url)
-
     await db.materials.insert_one(material.model_dump())
     return material
 
@@ -241,7 +209,7 @@ async def update_material(
     result = await db.materials.find_one_and_update(
         {"id": material_id},
         {"$set": update_data},
-        return_document=True,
+        return_document=ReturnDocument.AFTER,
         projection={"_id": 0},
     )
 

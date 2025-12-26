@@ -75,6 +75,8 @@ export default function ManagePapers() {
   /* ---------------- Edit Paper ---------------- */
   const handleEdit = (paper) => {
     setEditingId(paper.id);
+    console.log("Editing ID:", editingId);
+
     setForm({
       year: paper.year || "",
       subject: paper.subject || "",
