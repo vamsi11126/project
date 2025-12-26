@@ -19,6 +19,8 @@ export default function ManageMaterials() {
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [editingId, setEditingId] = useState(null);
+
   const [form, setForm] = useState({
     title: "",
     subject: "",
@@ -29,7 +31,7 @@ export default function ManageMaterials() {
 
   const passcode = localStorage.getItem("admin_passcode");
 
-  // Fetch subjects
+  /* ---------------- Fetch Subjects ---------------- */
   const fetchSubjects = async () => {
     try {
       const res = await axios.get(`${BACKEND}/api/material-subjects`);
@@ -39,7 +41,7 @@ export default function ManageMaterials() {
     }
   };
 
-  // Fetch materials
+  /* ---------------- Fetch Materials ---------------- */
   const fetchMaterials = async () => {
     try {
       setLoading(true);
@@ -57,7 +59,7 @@ export default function ManageMaterials() {
     fetchMaterials();
   }, []);
 
-  // Add Material
+  /* ---------------- Add / Update ---------------- */
   const handleSubmit = async () => {
     if (!form.title || !form.subject || !form.type || !form.url) {
       toast.error("All fields are required!");
@@ -65,25 +67,49 @@ export default function ManageMaterials() {
     }
 
     try {
-      await axios.post(`${BACKEND}/api/materials`, form, {
-        headers: { "x-admin-passcode": passcode },
-      });
+      if (editingId) {
+        // UPDATE
+        await axios.put(
+          `${BACKEND}/api/materials/${editingId}`,
+          form,
+          { headers: { "x-admin-passcode": passcode } }
+        );
+        toast.success("Material updated successfully");
+      } else {
+        // ADD
+        await axios.post(`${BACKEND}/api/materials`, form, {
+          headers: { "x-admin-passcode": passcode },
+        });
+        toast.success("Material added successfully");
+      }
 
-      toast.success("Study material added");
-      setForm({ title: "", subject: "", type: "", description: "", url: "" });
+      resetForm();
       fetchMaterials();
     } catch {
-      toast.error("Failed to add material (Unauthorized or server error)");
+      toast.error("Unauthorized or server error");
     }
   };
 
-  // Delete Material
+  /* ---------------- Edit ---------------- */
+  const handleEdit = (material) => {
+    setEditingId(material.id);
+    setForm({
+      title: material.title,
+      subject: material.subject,
+      type: material.type,
+      description: material.description || "",
+      url: material.url,
+    });
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /* ---------------- Delete ---------------- */
   const deleteMaterial = async (id) => {
     try {
       await axios.delete(`${BACKEND}/api/materials/${id}`, {
         headers: { "x-admin-passcode": passcode },
       });
-
       toast.success("Material deleted");
       fetchMaterials();
     } catch {
@@ -91,11 +117,23 @@ export default function ManageMaterials() {
     }
   };
 
+  /* ---------------- Reset Form ---------------- */
+  const resetForm = () => {
+    setForm({
+      title: "",
+      subject: "",
+      type: "",
+      description: "",
+      url: "",
+    });
+    setEditingId(null);
+  };
+
   return (
     <AdminLayout>
       <h2 className="text-3xl font-bold mb-6">Manage Study Materials</h2>
 
-      {/* Add Material Form */}
+      {/* ---------- Add / Edit Form ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-6 rounded-lg shadow mb-10">
 
         <Input
@@ -148,31 +186,38 @@ export default function ManageMaterials() {
           className="md:col-span-2"
         />
 
-        <Button className="w-full md:col-span-1" onClick={handleSubmit}>
-          Add Material
+        <Button onClick={handleSubmit}>
+          {editingId ? "Update Material" : "Add Material"}
         </Button>
+
+        {editingId && (
+          <Button variant="outline" onClick={resetForm}>
+            Cancel Edit
+          </Button>
+        )}
       </div>
 
-      {/* Loading */}
+      {/* ---------- Loading ---------- */}
       {loading && <p className="text-gray-600">Loading materials...</p>}
 
-      {/* Empty State */}
+      {/* ---------- Empty ---------- */}
       {!loading && materials.length === 0 && (
-        <p className="text-gray-500 text-center py-10">No study materials added yet.</p>
+        <p className="text-gray-500 text-center py-10">
+          No study materials added yet.
+        </p>
       )}
 
-      {/* Materials List */}
+      {/* ---------- Materials List ---------- */}
       <div className="space-y-5">
         {materials.map((m) => (
           <div
             key={m.id}
-            className="bg-white p-5 rounded-lg shadow border border-gray-200 hover:shadow-md transition"
+            className="bg-white p-5 rounded-lg shadow border hover:shadow-md transition"
           >
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-semibold">{m.title}</h3>
 
-                {/* Subject + Type Badges */}
                 <div className="flex gap-2 mt-2">
                   <span className="px-2 py-1 bg-gray-800 text-white text-xs rounded">
                     {m.subject}
@@ -182,10 +227,8 @@ export default function ManageMaterials() {
                   </span>
                 </div>
 
-                {/* Description */}
-                <p className="text-gray-700 mt-3">{m.description}</p>
+                <p className="text-gray-700 mt-3">{m.description} </p>
 
-                {/* URL */}
                 <a
                   href={m.url}
                   target="_blank"
@@ -196,12 +239,20 @@ export default function ManageMaterials() {
                 </a>
               </div>
 
-              <Button
-                variant="destructive"
-                onClick={() => deleteMaterial(m.id)}
-              >
-                Delete
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  onClick={() => handleEdit(m)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => deleteMaterial(m.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
         ))}
