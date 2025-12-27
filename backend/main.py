@@ -194,6 +194,18 @@ async def get_filters():
 # ------------------------------
 # MATERIALS CRUD
 # ------------------------------
+# ------------------------------
+# ADMIN AUTH & STATS
+# ------------------------------
+@api_router.post("/admin/verify")
+async def verify_admin(x_admin_passcode: str = Header(None)):
+    if not x_admin_passcode:
+        raise HTTPException(status_code=400, detail="Passcode header missing")
+
+    if x_admin_passcode != ADMIN_PASSCODE:
+        raise HTTPException(status_code=401, detail="Invalid admin passcode")
+
+    return {"status": "success"}
 @api_router.get("/materials", response_model=List[Material])
 async def get_materials():
     return await db.materials.find({}, {"_id": 0}).to_list(1000)
