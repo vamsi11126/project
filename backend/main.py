@@ -175,6 +175,23 @@ async def delete_paper(paper_id: str, x_admin_passcode: str = Header(None)):
     return {"message": "Paper deleted successfully"}
 
 # ------------------------------
+# FILTERS (Years / Dept / Subjects)
+# ------------------------------
+@api_router.get("/filters")
+async def get_filters():
+    papers = await db.papers.find({}, {"_id": 0}).to_list(1000)
+
+    years = sorted(list(set(p["year"] for p in papers)), reverse=True)
+    departments = sorted(list(set(p["department"] for p in papers)))
+    subjects = sorted(list(set(p["subject"] for p in papers)))
+
+    return {
+        "years": years,
+        "departments": departments,
+        "subjects": subjects,
+    }
+
+# ------------------------------
 # MATERIALS CRUD
 # ------------------------------
 @api_router.get("/materials", response_model=List[Material])
