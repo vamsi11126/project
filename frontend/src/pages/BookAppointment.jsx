@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+const COLLEGE_EMAIL_DOMAIN = (process.env.REACT_APP_COLLEGE_EMAIL_DOMAIN || "").toLowerCase();
 
 export default function BookAppointment() {
   const { facultyId } = useParams();
@@ -20,6 +21,7 @@ export default function BookAppointment() {
 
   const [formData, setFormData] = useState({
     student_name: "",
+    student_email: "",
     registration_number: "",
     section: "",
     year: "",
@@ -31,6 +33,7 @@ export default function BookAppointment() {
   const [otpCode, setOtpCode] = useState("");
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpHint, setOtpHint] = useState("");
+  const [otpDestination, setOtpDestination] = useState("");
 
   const otpStepActive = useMemo(() => Boolean(appointmentId), [appointmentId]);
 
@@ -75,12 +78,22 @@ export default function BookAppointment() {
   const validateForm = () => {
     const nextErrors = {};
     const studentName = formData.student_name.trim();
+    const studentEmail = formData.student_email.trim().toLowerCase();
     const regNo = formData.registration_number.trim().toUpperCase();
     const section = formData.section.trim().toUpperCase();
     const yearNum = Number(formData.year);
 
     if (studentName.length < 2) {
       nextErrors.student_name = "Enter at least 2 characters.";
+    }
+
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(studentEmail)) {
+      nextErrors.student_email = "Enter a valid college email.";
+    } else if (
+      COLLEGE_EMAIL_DOMAIN &&
+      !studentEmail.endsWith(`@${COLLEGE_EMAIL_DOMAIN}`)
+    ) {
+      nextErrors.student_email = `Email must end with @${COLLEGE_EMAIL_DOMAIN}.`;
     }
 
     if (!/^[A-Z0-9-]{4,20}$/.test(regNo)) {
@@ -116,6 +129,7 @@ export default function BookAppointment() {
       const payload = {
         faculty_id: facultyId,
         student_name: formData.student_name.trim(),
+        student_email: formData.student_email.trim().toLowerCase(),
         registration_number: formData.registration_number.trim().toUpperCase(),
         section: formData.section.trim().toUpperCase(),
         year: Number(formData.year),
@@ -124,7 +138,8 @@ export default function BookAppointment() {
       const response = await axios.post(`${API}/appointments`, payload);
       setAppointmentId(response?.data?.appointment_id || "");
       setOtpHint(response?.data?.otp_code || "");
-      toast.success("Appointment request submitted. Enter OTP to verify.");
+      setOtpDestination(response?.data?.otp_destination || "");
+      toast.success("OTP sent to your college email. Enter OTP to verify.");
     } catch (err) {
       toast.error(
         err?.response?.data?.detail || "Failed to submit appointment request."
@@ -221,6 +236,27 @@ export default function BookAppointment() {
               </div>
 
               <div className="form-group">
+                <Label htmlFor="student_email">Student College Email</Label>
+                <Input
+                  id="student_email"
+                  name="student_email"
+                  type="email"
+                  value={formData.student_email}
+                  onChange={handleChange}
+                  placeholder={
+                    COLLEGE_EMAIL_DOMAIN
+                      ? `yourname@${COLLEGE_EMAIL_DOMAIN}`
+                      : "yourname@college.edu"
+                  }
+                  disabled={otpStepActive}
+                  required
+                />
+                {errors.student_email ? (
+                  <p className="text-sm text-red-600">{errors.student_email}</p>
+                ) : null}
+              </div>
+
+              <div className="form-group">
                 <Label htmlFor="section">Section</Label>
                 <Input
                   id="section"
@@ -272,6 +308,12 @@ export default function BookAppointment() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {otpDestination ? (
+                <p className="mb-3 text-sm text-slate-600">
+                  OTP sent to: <span className="font-semibold text-slate-800">{otpDestination}</span>
+                </p>
+              ) : null}
+
               {otpHint ? (
                 <p className="mb-4 text-sm text-slate-600">
                   Dev OTP: <span className="font-semibold text-slate-800">{otpHint}</span>

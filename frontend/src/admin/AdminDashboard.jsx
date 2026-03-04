@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import AdminLayout from "./components/AdminLayout";
 import axios from "axios";
 import { FileText, Clock } from "lucide-react";
+import { toast } from "sonner";
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL;
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchStats();
@@ -14,10 +16,34 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     const passcode = localStorage.getItem("admin_passcode");
-    const res = await axios.get(`${BACKEND}/api/admin/stats`, {
-      headers: { "x-admin-passcode": passcode },
-    });
-    setStats(res.data);
+    const candidateUrls = [
+      `${BACKEND}/api/admin/stats`,
+      `${BACKEND}/admin/stats`,
+      "/api/admin/stats",
+    ];
+
+    setLoading(true);
+    for (const url of candidateUrls) {
+      try {
+        const res = await axios.get(url, {
+          headers: { "x-admin-passcode": passcode },
+        });
+        setStats(res.data);
+        setLoading(false);
+        return;
+      } catch (err) {
+        const status = err?.response?.status;
+        if (status === 404) {
+          continue;
+        }
+        setLoading(false);
+        toast.error(err?.response?.data?.detail || "Failed to load admin stats.");
+        return;
+      }
+    }
+
+    setLoading(false);
+    toast.error("Admin stats endpoint not found. Check backend URL configuration.");
   };
 
   return (
@@ -27,7 +53,7 @@ export default function AdminDashboard() {
           Admin Dashboard
         </h1>
 
-        {!stats ? (
+        {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2].map((i) => (
               <div
@@ -36,6 +62,8 @@ export default function AdminDashboard() {
               ></div>
             ))}
           </div>
+        ) : !stats ? (
+          <div className="text-red-300">Unable to fetch dashboard stats.</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <StatCard

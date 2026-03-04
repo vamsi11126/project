@@ -19,6 +19,7 @@ import Papers from "./pages/Papers";
 import FindFaculty from "./pages/FindFaculty";
 import FacultyDetails from "./pages/FacultyDetails";
 import BookAppointment from "./pages/BookAppointment";
+import FacultyDashboard from "./pages/FacultyDashboard";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
@@ -478,6 +479,7 @@ function App() {
           <Route path="/faculty" element={<FindFaculty />} />
           <Route path="/faculty/:facultyId" element={<FacultyDetails />} />
           <Route path="/faculty/:facultyId/book" element={<BookAppointment />} />
+          <Route path="/faculty/:facultyId/dashboard" element={<FacultyDashboard />} />
           <Route path="/request" element={<RequestForm />} />
 
           {/* ADMIN ROUTES */}
