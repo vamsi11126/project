@@ -844,17 +844,30 @@ async def verify_admin(x_admin_passcode: str = Header(None)):
 
     return {"status": "success"}
 
-@api_router.get("/admin/stats")
-async def admin_stats(x_admin_passcode: str = Header(None)):
-    await check_admin(x_admin_passcode)
-
+async def build_admin_stats():
     papers_count = await db.papers.count_documents({})
-    requests_count = await db.requests.count_documents({})
+    pending_requests_count = await db.appointments.count_documents(
+        {"appointment_status": "pending", "otp_verified": True}
+    )
 
     return {
         "papers_count": papers_count,
-        "requests_count": requests_count,
+        "pending_requests_count": pending_requests_count,
+        # Backward-compatible key used by current frontend dashboard.
+        "requests_count": pending_requests_count,
     }
+
+
+@api_router.get("/admin/stats")
+async def admin_stats_api(x_admin_passcode: str = Header(None)):
+    await check_admin(x_admin_passcode)
+    return await build_admin_stats()
+
+
+@app.get("/admin/stats")
+async def admin_stats_root(x_admin_passcode: str = Header(None)):
+    await check_admin(x_admin_passcode)
+    return await build_admin_stats()
 
 # ------------------------------
 # APP CONFIG
