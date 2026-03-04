@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -7,18 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, BookOpen, Calculator, MessageSquare, GraduationCap, Download, ExternalLink,Menu } from "lucide-react";
+import { FileText, Calculator, MessageSquare, GraduationCap, Menu } from "lucide-react";
 import { toast } from "sonner";
 import AdminLogin from "./admin/AdminLogin";
 import AdminDashboard from "./admin/AdminDashboard";
 import ManagePapers from "./admin/ManagePapers";
-import ManageMaterials from "./admin/ManageMaterials";
 import ManageRequests from "./admin/ManageRequests";
 import Footer from "./components/ui/Footer";
 import ProtectedRoute from "./admin/components/ProtectedRoute";
 import Papers from "./pages/Papers";
-import Materials from "./pages/Materials";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
@@ -69,14 +66,6 @@ const Navigation = () => {
             Exam Papers
           </Link>
           <Link 
-            to="/materials" 
-            className={isActive("/materials") ? "nav-link active" : "nav-link"} 
-            data-testid="nav-materials"
-            onClick={closeMenu}
-          >
-            Study Materials
-          </Link>
-          <Link 
             to="/calculator" 
             className={isActive("/calculator") ? "nav-link active" : "nav-link"} 
             data-testid="nav-calculator"
@@ -105,19 +94,13 @@ const Home = () => {
         <div className="hero-content">
           <h1 className="hero-title" data-testid="hero-title">Your Academic Success Hub</h1>
           <p className="hero-subtitle" data-testid="hero-subtitle">
-            Access exam papers, study materials, track attendance, and request resources - all in one place
+            Access exam papers, track attendance, and request resources - all in one place
           </p>
           <div className="hero-buttons">
             <Link to="/papers">
               <Button size="lg" className="hero-btn primary" data-testid="hero-papers-btn">
                 <FileText className="btn-icon" />
                 Browse Papers
-              </Button>
-            </Link>
-            <Link to="/materials">
-              <Button size="lg" variant="outline" className="hero-btn secondary" data-testid="hero-materials-btn">
-                <BookOpen className="btn-icon" />
-                Study Materials
               </Button>
             </Link>
           </div>
@@ -141,17 +124,6 @@ const Home = () => {
               </CardHeader>
             </Card>
           </Link>
-          <Link to="/materials" className="feature-card-link">
-            <Card className="feature-card" data-testid="feature-materials">
-              <CardHeader>
-                <div className="feature-icon materials">
-                  <BookOpen />
-                </div>
-                <CardTitle>Study Materials</CardTitle>
-                <CardDescription>Access notes, PDFs, and Google Drive resources organized by subject</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
           <Link to="/calculator" className="feature-card-link">
             <Card className="feature-card" data-testid="feature-calculator">
               <CardHeader>
@@ -169,8 +141,8 @@ const Home = () => {
                 <div className="feature-icon request">
                   <MessageSquare />
                 </div>
-                <CardTitle>Request Materials</CardTitle>
-                <CardDescription>Can't find something? Request papers or materials here</CardDescription>
+                <CardTitle>Request Resources</CardTitle>
+                <CardDescription>Can't find something? Send your request here</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -404,15 +376,15 @@ const RequestForm = () => {
   return (
     <div className="page-container">
       <div className="page-header">
-        <h1 className="page-title" data-testid="request-title">Request Materials</h1>
-        <p className="page-description" data-testid="request-description">Can't find the paper or material you're looking for? Let us know!</p>
+        <h1 className="page-title" data-testid="request-title">Request Resources</h1>
+        <p className="page-description" data-testid="request-description">Can't find what you're looking for? Let us know.</p>
       </div>
 
       <div className="request-section">
         <Card className="request-card">
           <CardHeader>
             <CardTitle>Submit Your Request</CardTitle>
-            <CardDescription>Fill out the form below and we'll try to add the requested material</CardDescription>
+            <CardDescription>Fill out the form below and we will review your request</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="request-form">
@@ -460,7 +432,7 @@ const RequestForm = () => {
                 <Textarea
                   id="details"
                   name="details"
-                  placeholder="Please describe what you're looking for (subject, year, type of material, etc.)"
+                  placeholder="Please describe what you're looking for"
                   value={formData.details}
                   onChange={handleChange}
                   required
@@ -491,7 +463,6 @@ function App() {
           {/* USER ROUTES */}
           <Route path="/" element={<Home />} />
           <Route path="/papers" element={<Papers />} />
-          <Route path="/materials" element={<Materials />} />
           <Route path="/calculator" element={<AttendanceCalculator />} />
           <Route path="/request" element={<RequestForm />} />
 
@@ -512,15 +483,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <ManagePapers />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin/materials"
-            element={
-              <ProtectedRoute>
-                <ManageMaterials />
               </ProtectedRoute>
             }
           />

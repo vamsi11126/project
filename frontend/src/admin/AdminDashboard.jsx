@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "./components/AdminLayout";
 import axios from "axios";
-import { FileText, BookOpen, Clock } from "lucide-react";
+import { FileText, Clock } from "lucide-react";
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL;
 
@@ -28,9 +28,8 @@ export default function AdminDashboard() {
         </h1>
 
         {!stats ? (
-          // 🌟 Loading Skeleton
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
               <div
                 key={i}
                 className="bg-white/10 h-32 rounded-xl animate-pulse"
@@ -38,23 +37,16 @@ export default function AdminDashboard() {
             ))}
           </div>
         ) : (
-          // 🌟 Stats Cards
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <StatCard
               title="Total Papers"
-              value={stats.papers}
+              value={stats.papers_count}
               icon={<FileText size={28} />}
               gradient="from-blue-600 to-blue-400"
             />
             <StatCard
-              title="Study Materials"
-              value={stats.materials}
-              icon={<BookOpen size={28} />}
-              gradient="from-purple-600 to-purple-400"
-            />
-            <StatCard
               title="Pending Requests"
-              value={stats.requests}
+              value={stats.requests_count}
               icon={<Clock size={28} />}
               gradient="from-rose-600 to-rose-400"
             />
@@ -65,7 +57,6 @@ export default function AdminDashboard() {
   );
 }
 
-// ✔️ Reusable Stat Card Component
 function StatCard({ title, value, icon, gradient }) {
   return (
     <div

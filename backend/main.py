@@ -9,7 +9,6 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
 import re
 import httpx
 
@@ -87,24 +86,6 @@ class PaperUpdate(BaseModel):
     year: Optional[int] = None
     pdfUrl: Optional[str] = None
     type: Optional[str] = None
-
-
-class Material(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    title: str
-    subject: str
-    type: str
-    url: str
-    description: str
-
-
-class MaterialUpdate(BaseModel):
-    title: Optional[str] = None
-    subject: Optional[str] = None
-    type: Optional[str] = None
-    url: Optional[str] = None
-    description: Optional[str] = None
 
 # ------------------------------
 # ROOT
@@ -191,12 +172,6 @@ async def get_filters():
         "subjects": subjects,
     }
 
-# ------------------------------
-# MATERIALS CRUD
-# ------------------------------
-# ------------------------------
-# ADMIN AUTH & STATS
-# ------------------------------
 @api_router.post("/admin/verify")
 async def verify_admin(x_admin_passcode: str = Header(None)):
     if not x_admin_passcode:
@@ -206,46 +181,18 @@ async def verify_admin(x_admin_passcode: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid admin passcode")
 
     return {"status": "success"}
-@api_router.get("/materials", response_model=List[Material])
-async def get_materials():
-    return await db.materials.find({}, {"_id": 0}).to_list(1000)
 
-
-@api_router.post("/materials", response_model=Material)
-async def add_material(material: Material, x_admin_passcode: str = Header(None)):
-    await check_admin(x_admin_passcode)
-    material.url = await normalize_and_validate_drive_url(material.url)
-    await db.materials.insert_one(material.model_dump())
-    return material
-
-
-@api_router.put("/materials/{material_id}", response_model=Material)
-async def update_material(
-    material_id: str,
-    material: MaterialUpdate,
-    x_admin_passcode: str = Header(None),
-):
+@api_router.get("/admin/stats")
+async def admin_stats(x_admin_passcode: str = Header(None)):
     await check_admin(x_admin_passcode)
 
-    update_data = {k: v for k, v in material.model_dump().items() if v is not None}
+    papers_count = await db.papers.count_documents({})
+    requests_count = await db.requests.count_documents({})
 
-    if "url" in update_data:
-        update_data["url"] = await normalize_and_validate_drive_url(update_data["url"])
-
-    if not update_data:
-        raise HTTPException(status_code=400, detail="No fields provided")
-
-    result = await db.materials.find_one_and_update(
-        {"id": material_id},
-        {"$set": update_data},
-        return_document=ReturnDocument.AFTER,
-        projection={"_id": 0},
-    )
-
-    if not result:
-        raise HTTPException(status_code=404, detail="Material not found")
-
-    return result
+    return {
+        "papers_count": papers_count,
+        "requests_count": requests_count,
+    }
 
 # ------------------------------
 # APP CONFIG

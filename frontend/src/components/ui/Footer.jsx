@@ -43,8 +43,7 @@ export default function Footer() {
             <ul className="mt-4 space-y-2 text-sm text-gray-700">
               <li><a href="/" className="hover:text-[#004a86] transition">Home</a></li>
               <li><a href="/papers" className="hover:text-[#004a86] transition">Exam Papers</a></li>
-              <li><a href="/materials" className="hover:text-[#004a86] transition">Study Materials</a></li>
-              <li><a href="/attendance" className="hover:text-[#004a86] transition">Attendance Tool</a></li>
+              <li><a href="/calculator" className="hover:text-[#004a86] transition">Attendance Tool</a></li>
               <li><a href="/request" className="hover:text-[#004a86] transition">Request Resources</a></li>
             </ul>
           </div>

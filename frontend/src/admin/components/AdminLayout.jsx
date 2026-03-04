@@ -6,7 +6,6 @@ import {
   X,
   LayoutDashboard,
   FileText,
-  Book,
   Inbox,
   LogOut,
 } from "lucide-react";
@@ -18,7 +17,6 @@ export default function AdminLayout({ children }) {
   const navLinks = [
     { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { to: "/admin/papers", label: "Papers", icon: <FileText size={18} /> },
-    { to: "/admin/materials", label: "Materials", icon: <Book size={18} /> },
     { to: "/admin/requests", label: "Requests", icon: <Inbox size={18} /> },
   ];
 
