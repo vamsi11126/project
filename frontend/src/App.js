@@ -14,11 +14,12 @@ import AdminDashboard from "./admin/AdminDashboard";
 import ManagePapers from "./admin/ManagePapers";
 import ManageRequests from "./admin/ManageRequests";
 import Footer from "./components/ui/Footer";
-import ProtectedRoute from "./admin/components/ProtectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Papers from "./pages/Papers";
 import FindFaculty from "./pages/FindFaculty";
 import FacultyDetails from "./pages/FacultyDetails";
 import BookAppointment from "./pages/BookAppointment";
+import FacultyLogin from "./pages/FacultyLogin";
 import FacultyDashboard from "./pages/FacultyDashboard";
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -92,6 +93,14 @@ const Navigation = () => {
             onClick={closeMenu}
           >
             Request
+          </Link>
+          <div className="nav-divider mx-2 h-6 border-l border-white/20 hidden md:block"></div>
+          <Link 
+            to="/faculty/login" 
+            className="nav-link faculty-portal-link bg-primary/20 rounded-lg px-4 font-semibold hover:bg-primary/40 transition-all border border-primary/30"
+            onClick={closeMenu}
+          >
+            Faculty Portal
           </Link>
         </div>
       </div>
@@ -477,9 +486,18 @@ function App() {
           <Route path="/papers" element={<Papers />} />
           <Route path="/calculator" element={<AttendanceCalculator />} />
           <Route path="/faculty" element={<FindFaculty />} />
+          {/* FACULTY ROUTES */}
+          <Route path="/faculty/login" element={<FacultyLogin />} />
+          <Route 
+            path="/faculty/dashboard" 
+            element={
+              <ProtectedRoute role="faculty">
+                <FacultyDashboard />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/faculty/:facultyId" element={<FacultyDetails />} />
           <Route path="/faculty/:facultyId/book" element={<BookAppointment />} />
-          <Route path="/faculty/:facultyId/dashboard" element={<FacultyDashboard />} />
           <Route path="/request" element={<RequestForm />} />
 
           {/* ADMIN ROUTES */}
