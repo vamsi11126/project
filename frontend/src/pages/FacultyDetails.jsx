@@ -5,8 +5,6 @@ import { ArrowLeft, CalendarCheck2, MapPin, LayoutDashboard } from "lucide-react
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { API } from "@/lib/api";
-const DEFAULT_IMAGE =
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=1000&q=80";
 
 export default function FacultyDetails() {
   const { facultyId } = useParams();
@@ -74,11 +72,13 @@ export default function FacultyDetails() {
           <CardContent className="p-0">
             <div className="grid grid-cols-1 gap-0 md:grid-cols-2">
               <div className="h-full min-h-[280px] bg-slate-100 md:min-h-[420px]">
-                <img
-                  src={faculty.image || DEFAULT_IMAGE}
-                  alt={faculty.name ? `${faculty.name} profile` : "Faculty profile"}
-                  className="h-full w-full object-cover"
-                />
+                {faculty.image ? (
+                  <img
+                    src={faculty.image}
+                    alt={faculty.name ? `${faculty.name} profile` : "Faculty profile"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : null}
               </div>
 
               <div className="space-y-6 p-6 sm:p-8">
