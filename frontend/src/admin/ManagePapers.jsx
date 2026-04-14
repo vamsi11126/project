@@ -11,6 +11,7 @@ export default function ManagePapers() {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [pdfUrlError, setPdfUrlError] = useState("");
   const [form, setForm] = useState({
     year: "",
     subject: "",
@@ -19,6 +20,16 @@ export default function ManagePapers() {
     type: "",
     pdfUrl: "",
   });
+
+  const isDriveUrl = (value) => {
+    try {
+      const parsed = new URL(value.trim());
+      const host = parsed.hostname.toLowerCase();
+      return host === "drive.google.com" || host === "docs.google.com";
+    } catch {
+      return false;
+    }
+  };
 
   const fetchPapers = async () => {
     setLoading(true);
@@ -39,6 +50,13 @@ export default function ManagePapers() {
   const handleSubmit = async () => {
     if (!form.title || !form.year || !form.pdfUrl) {
       toast.error("Please fill required fields");
+      return;
+    }
+
+    if (!isDriveUrl(form.pdfUrl)) {
+      const message = "PDF link must be a Google Drive URL.";
+      setPdfUrlError(message);
+      toast.error(message);
       return;
     }
 
@@ -91,6 +109,7 @@ export default function ManagePapers() {
       type: "",
       pdfUrl: "",
     });
+    setPdfUrlError("");
     setEditingId(null);
   };
 
@@ -131,11 +150,19 @@ export default function ManagePapers() {
         />
 
         <Input
-          placeholder="PDF / Drive URL"
+          placeholder="Google Drive PDF URL"
           value={form.pdfUrl}
-          onChange={(event) => setForm({ ...form, pdfUrl: event.target.value })}
+          onChange={(event) => {
+            setForm({ ...form, pdfUrl: event.target.value });
+            if (pdfUrlError) {
+              setPdfUrlError("");
+            }
+          }}
           className="md:col-span-3"
         />
+        {pdfUrlError ? (
+          <p className="md:col-span-3 text-sm font-medium text-red-600">{pdfUrlError}</p>
+        ) : null}
 
         <Button onClick={handleSubmit} className="md:col-span-2">
           {editingId ? "Update Paper" : "Add Paper"}

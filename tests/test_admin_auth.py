@@ -1,13 +1,16 @@
+import asyncio
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 
 import pytest
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from pymongo import ReturnDocument
 
 import main as backend_main
 from app.core.security import get_password_hash
 from app.db.mongodb import get_database
+from app.utils.drive import normalize_and_validate_drive_url
 
 
 class FakeCursor:
@@ -209,6 +212,34 @@ def login_as_admin(client, email="admin@example.com", password="Password123"):
         "/api/auth/admin/login",
         json={"email": email, "password": password},
     )
+
+
+def test_faculty_login_rejects_non_college_email(client):
+    response = client.post(
+        "/api/auth/faculty/login",
+        json={"email": "faculty@gmail.com"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Use your college email ending with @klu.ac.in."
+
+
+def test_faculty_password_login_rejects_non_college_email(client):
+    response = client.post(
+        "/api/auth/faculty/password-login",
+        json={"email": "faculty@gmail.com", "password": "Password123"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Use your college email ending with @klu.ac.in."
+
+
+def test_drive_url_validation_rejects_non_drive_link():
+    with pytest.raises(HTTPException) as exc_info:
+        asyncio.run(normalize_and_validate_drive_url("https://example.com/dbms.pdf"))
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "PDF link must be a Google Drive URL."
 
 
 def test_admin_login_sets_cookie_and_returns_admin(client):

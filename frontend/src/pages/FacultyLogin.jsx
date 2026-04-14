@@ -13,6 +13,7 @@ const FacultyLogin = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1); // 1: Email, 2: OTP, 3: Password, 4: Set Password
     const [email, setEmail] = useState("");
+    const [emailError, setEmailError] = useState("");
     const [otp, setOtp] = useState("");
     const [password, setPassword] = useState("");
     const [otpId, setOtpId] = useState("");
@@ -22,6 +23,7 @@ const FacultyLogin = () => {
     const handleCheckEmail = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setEmailError("");
         try {
             const response = await axios.post(`${API}/auth/faculty/login`, { email });
             const { status } = response.data;
@@ -35,7 +37,10 @@ const FacultyLogin = () => {
                 toast.success("Login code sent to your academic email.");
             }
         } catch (err) {
-            toast.error(err.response?.data?.detail || "Only authorized academic domains are allowed.");
+            const message =
+                err.response?.data?.detail || "Use your college email address to continue.";
+            setEmailError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -149,10 +154,18 @@ const FacultyLogin = () => {
                                             type="email" 
                                             className="pl-10"
                                             value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            onChange={(e) => {
+                                                setEmail(e.target.value);
+                                                if (emailError) {
+                                                    setEmailError("");
+                                                }
+                                            }}
                                             required 
                                         />
                                     </div>
+                                    {emailError ? (
+                                        <p className="text-sm font-medium text-red-600">{emailError}</p>
+                                    ) : null}
                                 </div>
                                 <Button className="w-full h-11" type="submit" disabled={loading}>
                                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Continue"}

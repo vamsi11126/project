@@ -2,12 +2,17 @@ import uuid
 from fastapi import HTTPException
 from app.core.security import create_access_token, verify_password, get_password_hash
 from app.services.otp_service import create_otp_session, verify_otp_session
-from app.utils.validation import is_college_email
+from app.utils.validation import college_email_error_message, is_college_email
+
+
+def _ensure_college_email(email: str) -> str:
+    normalized_email = email.strip().lower()
+    if not is_college_email(normalized_email):
+        raise HTTPException(status_code=400, detail=college_email_error_message())
+    return normalized_email
 
 async def request_faculty_login(db, email: str):
-    email = email.strip().lower()
-    if not is_college_email(email):
-        raise HTTPException(status_code=400, detail="Only college email addresses are allowed.")
+    email = _ensure_college_email(email)
 
     faculty = await db.faculty_profiles.find_one({"email": email})
     
@@ -20,7 +25,7 @@ async def request_faculty_login(db, email: str):
     return {"status": "needs_otp", **otp_response}
 
 async def login_with_password(db, email: str, password: str):
-    email = email.strip().lower()
+    email = _ensure_college_email(email)
     faculty = await db.faculty_profiles.find_one({"email": email})
     
     if not faculty or not faculty.get("hashed_password"):
@@ -41,7 +46,7 @@ async def verify_faculty_login(db, otp_id: str, otp_code: str):
     if not session:
         raise HTTPException(status_code=404, detail="Session expired or invalid.")
     
-    email = session.get("destination")
+    email = _ensure_college_email(session.get("destination", ""))
     
     # Check if faculty exists, if not, CREATE Skeleton profile
     faculty = await db.faculty_profiles.find_one({"email": email})
@@ -56,7 +61,7 @@ async def verify_faculty_login(db, otp_id: str, otp_code: str):
             "department": "",
             "available_time_slots": [],
             "is_complete": False,
-            "hashed_password": None
+            "hashed_password": None,
         }
         await db.faculty_profiles.insert_one(new_faculty)
         faculty = new_faculty
@@ -68,16 +73,16 @@ async def verify_faculty_login(db, otp_id: str, otp_code: str):
     needs_password = faculty.get("hashed_password") is None
     
     return {
-        "access_token": token, 
-        "token_type": "bearer", 
+        "access_token": token,
+        "token_type": "bearer",
         "faculty_id": faculty["id"],
-        "needs_password": needs_password
+        "needs_password": needs_password,
     }
 
 async def set_faculty_password(db, faculty_id: str, password: str):
     if len(password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
-        
+
     hashed = get_password_hash(password)
     result = await db.faculty_profiles.update_one(
         {"id": faculty_id},
