@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import FacultyCard from "@/components/FacultyCard";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { API } from "@/lib/api";
 
 export default function FindFaculty() {
   const [facultyList, setFacultyList] = useState([]);

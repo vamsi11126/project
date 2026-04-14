@@ -29,7 +29,7 @@ async def login_with_password(db, email: str, password: str):
     if not verify_password(password, faculty["hashed_password"]):
         raise HTTPException(status_code=401, detail="Invalid email or password.")
         
-    token = create_access_token(data={"sub": faculty["id"]})
+    token = create_access_token(data={"sub": faculty["id"], "role": "faculty"})
     return {"access_token": token, "token_type": "bearer", "faculty_id": faculty["id"]}
 
 async def verify_faculty_login(db, otp_id: str, otp_code: str):
@@ -62,7 +62,7 @@ async def verify_faculty_login(db, otp_id: str, otp_code: str):
         faculty = new_faculty
          
     # Create JWT
-    token = create_access_token(data={"sub": faculty["id"]})
+    token = create_access_token(data={"sub": faculty["id"], "role": "faculty"})
     
     # Return if password needs to be set
     needs_password = faculty.get("hashed_password") is None

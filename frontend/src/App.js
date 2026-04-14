@@ -12,17 +12,16 @@ import { toast } from "sonner";
 import AdminLogin from "./admin/AdminLogin";
 import AdminDashboard from "./admin/AdminDashboard";
 import ManagePapers from "./admin/ManagePapers";
-import ManageRequests from "./admin/ManageRequests";
+import AdminProtectedRoute from "./admin/components/ProtectedRoute";
 import Footer from "./components/ui/Footer";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { API } from "@/lib/api";
 import Papers from "./pages/Papers";
 import FindFaculty from "./pages/FindFaculty";
 import FacultyDetails from "./pages/FacultyDetails";
 import BookAppointment from "./pages/BookAppointment";
 import FacultyLogin from "./pages/FacultyLogin";
 import FacultyDashboard from "./pages/FacultyDashboard";
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
 
 // Replace your existing Navigation component with this:
 
@@ -506,27 +505,18 @@ function App() {
           <Route
             path="/admin/dashboard"
             element={
-              <ProtectedRoute>
+              <AdminProtectedRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
+              </AdminProtectedRoute>
             }
           />
 
           <Route
             path="/admin/papers"
             element={
-              <ProtectedRoute>
+              <AdminProtectedRoute>
                 <ManagePapers />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/admin/requests"
-            element={
-              <ProtectedRoute>
-                <ManageRequests />
-              </ProtectedRoute>
+              </AdminProtectedRoute>
             }
           />
 

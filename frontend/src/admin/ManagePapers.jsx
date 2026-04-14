@@ -1,18 +1,16 @@
-import { useState, useEffect } from "react";
-import AdminLayout from "./components/AdminLayout";
+import { useEffect, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { toast } from "sonner";
 
-const BACKEND = process.env.REACT_APP_BACKEND_URL;
+import AdminLayout from "@/admin/components/AdminLayout";
+import adminApi from "./api";
 
 export default function ManagePapers() {
   const [papers, setPapers] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [editingId, setEditingId] = useState(null);
-
   const [form, setForm] = useState({
     year: "",
     subject: "",
@@ -22,14 +20,11 @@ export default function ManagePapers() {
     pdfUrl: "",
   });
 
-  const passcode = localStorage.getItem("admin_passcode");
-
-  /* ---------------- Fetch Papers ---------------- */
   const fetchPapers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND}/api/papers`);
-      setPapers(res.data);
+      const response = await adminApi.get("/papers");
+      setPapers(response.data);
     } catch {
       toast.error("Failed to load papers");
     } finally {
@@ -41,7 +36,6 @@ export default function ManagePapers() {
     fetchPapers();
   }, []);
 
-  /* ---------------- Add / Update Paper ---------------- */
   const handleSubmit = async () => {
     if (!form.title || !form.year || !form.pdfUrl) {
       toast.error("Please fill required fields");
@@ -50,33 +44,22 @@ export default function ManagePapers() {
 
     try {
       if (editingId) {
-        // UPDATE
-        await axios.put(
-          `${BACKEND}/api/papers/${editingId}`,
-          form,
-          { headers: { "x-admin-passcode": passcode } }
-        );
+        await adminApi.put(`/papers/${editingId}`, form);
         toast.success("Paper updated successfully");
       } else {
-        // ADD
-        await axios.post(`${BACKEND}/api/papers`, form, {
-          headers: { "x-admin-passcode": passcode },
-        });
+        await adminApi.post("/papers", form);
         toast.success("Paper added successfully");
       }
 
       resetForm();
       fetchPapers();
-    } catch {
-      toast.error("Unauthorized / Failed");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to save paper");
     }
   };
 
-  /* ---------------- Edit Paper ---------------- */
   const handleEdit = (paper) => {
     setEditingId(paper.id);
-    console.log("Editing ID:", editingId);
-
     setForm({
       year: paper.year || "",
       subject: paper.subject || "",
@@ -89,20 +72,16 @@ export default function ManagePapers() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  /* ---------------- Delete Paper ---------------- */
   const deletePaper = async (id) => {
     try {
-      await axios.delete(`${BACKEND}/api/papers/${id}`, {
-        headers: { "x-admin-passcode": passcode },
-      });
+      await adminApi.delete(`/papers/${id}`);
       toast.success("Deleted successfully");
       fetchPapers();
-    } catch {
-      toast.error("Unauthorized action");
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to delete paper");
     }
   };
 
-  /* ---------------- Reset Form ---------------- */
   const resetForm = () => {
     setForm({
       year: "",
@@ -119,44 +98,42 @@ export default function ManagePapers() {
     <AdminLayout>
       <h2 className="text-2xl font-bold mb-6">Manage Exam Papers</h2>
 
-      {/* ---------- Add / Edit Form ---------- */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-6 rounded-lg shadow mb-8">
-
         <Input
           placeholder="Year"
           value={form.year}
-          onChange={(e) => setForm({ ...form, year: e.target.value })}
+          onChange={(event) => setForm({ ...form, year: event.target.value })}
         />
 
         <Input
           placeholder="Department"
           value={form.department}
-          onChange={(e) => setForm({ ...form, department: e.target.value })}
+          onChange={(event) => setForm({ ...form, department: event.target.value })}
         />
 
         <Input
           placeholder="Subject"
           value={form.subject}
-          onChange={(e) => setForm({ ...form, subject: e.target.value })}
+          onChange={(event) => setForm({ ...form, subject: event.target.value })}
         />
 
         <Input
           placeholder="Paper Title"
           value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          onChange={(event) => setForm({ ...form, title: event.target.value })}
           className="md:col-span-2"
         />
 
         <Input
           placeholder="Type (Mid / Sem / Supply)"
           value={form.type}
-          onChange={(e) => setForm({ ...form, type: e.target.value })}
+          onChange={(event) => setForm({ ...form, type: event.target.value })}
         />
 
         <Input
           placeholder="PDF / Drive URL"
           value={form.pdfUrl}
-          onChange={(e) => setForm({ ...form, pdfUrl: e.target.value })}
+          onChange={(event) => setForm({ ...form, pdfUrl: event.target.value })}
           className="md:col-span-3"
         />
 
@@ -171,40 +148,39 @@ export default function ManagePapers() {
         )}
       </div>
 
-      {/* ---------- Papers List ---------- */}
       <div className="space-y-4">
         {loading ? (
           <p>Loading...</p>
         ) : papers.length === 0 ? (
           <p className="text-gray-500">No papers found.</p>
         ) : (
-          papers.map((p) => (
+          papers.map((paper) => (
             <div
-              key={p.id}
+              key={paper.id}
               className="flex items-center justify-between bg-white p-4 rounded-lg shadow"
             >
               <div>
-                <h3 className="font-semibold text-lg">{p.title}</h3>
+                <h3 className="font-semibold text-lg">{paper.title}</h3>
                 <p className="text-gray-600 text-sm">
-                  Year: {p.year} • Dept: {p.department} • Subject: {p.subject} • Type: {p.type}
+                  Year: {paper.year} | Dept: {paper.department} | Subject: {paper.subject} | Type: {paper.type}
                 </p>
                 <a
-                  href={p.pdfUrl}
+                  href={paper.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline text-sm"
                 >
-                  Open Paper →
+                  Open Paper
                 </a>
               </div>
 
               <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => handleEdit(p)}>
+                <Button variant="secondary" onClick={() => handleEdit(paper)}>
                   Edit
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={() => deletePaper(p.id)}
+                  onClick={() => deletePaper(paper.id)}
                 >
                   Delete
                 </Button>

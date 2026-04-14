@@ -1,50 +1,47 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, FileText, LogOut, Menu, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Menu,
-  X,
-  LayoutDashboard,
-  FileText,
-  Inbox,
-  LogOut,
-} from "lucide-react";
+import { toast } from "sonner";
+
+import adminApi from "../api";
 
 export default function AdminLayout({ children }) {
   const [mobileNav, setMobileNav] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { to: "/admin/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
     { to: "/admin/papers", label: "Papers", icon: <FileText size={18} /> },
-    { to: "/admin/requests", label: "Requests", icon: <Inbox size={18} /> },
   ];
 
   const isActive = (path) => location.pathname.startsWith(path);
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_passcode");
-    window.location.reload();
+  const handleLogout = async () => {
+    try {
+      await adminApi.post("/auth/admin/logout");
+    } catch {
+      toast.error("Could not complete logout cleanly. Redirecting to login.");
+    } finally {
+      navigate("/admin/login", { replace: true });
+    }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
-
-      {/* 🔷 MAIN NAVBAR (Desktop + Mobile) */}
       <header className="w-full bg-gray-900 text-white px-4 py-3 sticky top-0 z-50 flex items-center justify-between md:justify-start gap-6">
-
-        {/* LEFT: Admin Panel Heading */}
         <h1 className="text-xl font-bold whitespace-nowrap">Admin Panel</h1>
 
-        {/* MOBILE MENU ICON */}
         <button
           className="md:hidden ml-auto"
           onClick={() => setMobileNav(!mobileNav)}
+          aria-label="Toggle admin navigation"
         >
           {mobileNav ? <X size={28} /> : <Menu size={28} />}
         </button>
 
-        {/* DESKTOP NAV LINKS */}
         <div className="hidden md:flex items-center gap-6 ml-10">
           {navLinks.map((link) => (
             <Link
@@ -63,7 +60,6 @@ export default function AdminLayout({ children }) {
           ))}
         </div>
 
-        {/* DESKTOP LOGOUT BUTTON */}
         <div className="hidden md:flex ml-auto">
           <Button
             variant="destructive"
@@ -73,10 +69,8 @@ export default function AdminLayout({ children }) {
             <LogOut size={18} /> Logout
           </Button>
         </div>
-
       </header>
 
-      {/* 🔷 MOBILE DROPDOWN */}
       {mobileNav && (
         <nav className="md:hidden bg-gray-800 text-white px-4 py-4 flex flex-col gap-3">
           {navLinks.map((link) => (
@@ -96,7 +90,6 @@ export default function AdminLayout({ children }) {
             </Link>
           ))}
 
-          {/* MOBILE LOGOUT */}
           <Button
             variant="destructive"
             onClick={handleLogout}
@@ -107,7 +100,6 @@ export default function AdminLayout({ children }) {
         </nav>
       )}
 
-      {/* 🔷 MAIN CONTENT */}
       <main className="flex-1 p-6">{children}</main>
     </div>
   );

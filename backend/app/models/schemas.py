@@ -34,6 +34,16 @@ class Faculty(BaseModel):
     hashed_password: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Admin(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: f"admin_{str(uuid.uuid4())[:8]}")
+    email: EmailStr
+    name: str
+    hashed_password: str
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_login_at: Optional[datetime] = None
+
 class FacultyUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
@@ -139,3 +149,21 @@ class FacultySetPassword(BaseModel):
 class FacultyPasswordLogin(BaseModel):
     email: str
     password: str
+
+class AdminLoginRequest(BaseModel):
+    email: str
+    password: str
+
+class AdminPublic(BaseModel):
+    id: str
+    email: EmailStr
+    name: str
+
+class AdminLoginResponse(BaseModel):
+    admin: AdminPublic
+
+class AdminStats(BaseModel):
+    papers_count: int
+    faculty_count: int
+    appointments_count: int
+    pending_appointments_count: int
