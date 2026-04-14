@@ -151,7 +151,7 @@ const Home = () => {
                   <Calculator />
                 </div>
                 <CardTitle>Attendance Calculator</CardTitle>
-                <CardDescription>Calculate your attendance percentage and safe skip count</CardDescription>
+                <CardDescription>Check whether you have an attendance shortage and how many classes you need</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -205,39 +205,33 @@ const AttendanceCalculator = () => {
       return;
     }
 
-    // CURRENT ATTENDANCE %
     const percentage = (attendedNum / totalNum) * 100;
 
-    let canSkip = 0;
-    let needToAttend = 0;
-
-    // ⭐ SAFE CASE — calculate classes you can skip
     if (percentage >= thresholdNum) {
-      const rawSkip = (100 * attendedNum) / thresholdNum - totalNum;
-      canSkip = Math.max(0, Math.floor(rawSkip));
+      setResult({
+        percentage: percentage.toFixed(2),
+        needToAttend: 0,
+        status: "safe"
+      });
+      return;
     }
 
-    // ⭐ LOW ATTENDANCE — calculate required classes
-    else {
-      const denom = 1 - thresholdNum / 100;
+    const denom = 1 - thresholdNum / 100;
 
-      if (denom <= 0) {
-        toast.error("Threshold must be less than 100");
-        return;
-      }
-
-      const rawNeed =
-        ((thresholdNum * totalNum) / 100 - attendedNum) / denom;
-
-      needToAttend = Math.max(0, Math.ceil(rawNeed));
+    if (denom <= 0) {
+      toast.error("Threshold must be less than 100");
+      return;
     }
 
-    // FINAL RESULT OBJECT
+    const rawNeed =
+      ((thresholdNum * totalNum) / 100 - attendedNum) / denom;
+
+    const needToAttend = Math.max(0, Math.ceil(rawNeed));
+
     setResult({
       percentage: percentage.toFixed(2),
-      canSkip,
       needToAttend,
-      status: percentage >= thresholdNum ? "safe" : "warning"
+      status: "warning"
     });
   };
 
@@ -253,7 +247,7 @@ const AttendanceCalculator = () => {
       <div className="page-header">
         <h1 className="page-title" data-testid="calculator-title">Attendance Calculator</h1>
         <p className="page-description" data-testid="calculator-description">
-          Calculate your attendance percentage and find out how many classes you can skip
+          Calculate attendance shortage and find how many classes you need to attend to reach the target
         </p>
       </div>
 
@@ -324,14 +318,7 @@ const AttendanceCalculator = () => {
                   </div>
                 </div>
 
-                {result.status === "safe" ? (
-                  <div className="result-item">
-                    <div className="result-label">Classes You Can Skip</div>
-                    <div className="result-value safe">
-                      {result.canSkip} classes
-                    </div>
-                  </div>
-                ) : (
+                {result.status === "warning" && (
                   <div className="result-item">
                     <div className="result-label">Classes Needed to Attend</div>
                     <div className="result-value warning">
@@ -342,7 +329,7 @@ const AttendanceCalculator = () => {
 
                 <div className="result-message">
                   {result.status === "safe"
-                    ? `Great! Your attendance is above ${threshold}%. You can skip up to ${result.canSkip} classes without falling below the threshold.`
+                    ? `Your attendance is meeting the ${threshold}% target.`
                     : `Warning! Your attendance is below ${threshold}%. You need to attend at least ${result.needToAttend} consecutive classes to reach the required threshold.`}
                 </div>
 
