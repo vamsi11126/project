@@ -33,6 +33,7 @@ export default function BookAppointment() {
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [otpDestination, setOtpDestination] = useState("");
   const [step, setStep] = useState(1); // 1: Form, 2: OTP, 3: Success
+  const availableTimeSlots = Array.isArray(faculty?.available_time_slots) ? faculty.available_time_slots : [];
 
   useEffect(() => {
     const fetchFaculty = async () => {
@@ -161,7 +162,7 @@ export default function BookAppointment() {
                 <div className="border-t pt-6 bg-muted/10 p-4 rounded-xl">
                   <h3 className="font-bold mb-4 flex items-center"><Clock className="w-4 h-4 mr-2" /> Preferred Time Slot (Optional)</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {faculty?.available_time_slots.map((slot) => (
+                    {availableTimeSlots.map((slot) => (
                       <div 
                         key={slot}
                         onClick={() => setFormData({...formData, chosen_slot: formData.chosen_slot === slot ? "" : slot})}
@@ -174,7 +175,7 @@ export default function BookAppointment() {
                         {slot}
                       </div>
                     ))}
-                    {faculty?.available_time_slots.length === 0 && (
+                    {availableTimeSlots.length === 0 && (
                       <p className="col-span-2 text-center text-xs text-muted-foreground p-6 bg-white rounded-lg border-2 border-dashed">No slots listed by faculty. You can still initiate the request.</p>
                     )}
                   </div>

@@ -1,5 +1,6 @@
-import uuid
+import logging
 import re
+import uuid
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from app.core.config import settings
@@ -11,6 +12,8 @@ from app.services.notification_service import create_app_notification
 from pymongo import ReturnDocument
 
 # --- SERVICE LOGIC ---
+
+logger = logging.getLogger(__name__)
 
 async def create_appointment(db, appointment: AppointmentCreate):
     student_name = appointment.student_name.strip()
@@ -40,7 +43,8 @@ async def create_appointment(db, appointment: AppointmentCreate):
     if not faculty:
         raise HTTPException(status_code=404, detail="Faculty not found.")
         
-    if chosen_slot and chosen_slot not in faculty.get("available_time_slots", []):
+    faculty_slots = faculty.get("available_time_slots") or []
+    if chosen_slot and chosen_slot not in faculty_slots:
         raise HTTPException(status_code=400, detail="Requested slot is not available for this faculty member.")
 
     now = datetime.now(timezone.utc)
@@ -50,33 +54,43 @@ async def create_appointment(db, appointment: AppointmentCreate):
         db, destination=student_email, purpose="appointment_verification", ttl_minutes=5
     )
 
-    # Create Appointment Entry
-    appointment_id = str(uuid.uuid4())
-    appointment_doc = Appointment(
-        id=appointment_id,
-        student_name=student_name,
-        registration_number=registration_number,
-        section=section,
-        year=appointment.year,
-        reason=appointment.reason,
-        chosen_slot=chosen_slot,
-        faculty_id=appointment.faculty_id,
-        appointment_status="pending",
-        requested_time=now,
-        meeting_time=None,
-        created_at=now,
-        faculty_message=None
-    ).model_dump()
-    
-    appointment_doc.update({
-        "student_email": student_email,
-        "otp_session_id": otp_session["otp_id"],
-        "otp_verified": False,
-        "otp_expires_at": otp_session["expires_at"],
-    })
+    try:
+        appointment_id = str(uuid.uuid4())
+        appointment_doc = Appointment(
+            id=appointment_id,
+            student_name=student_name,
+            registration_number=registration_number,
+            section=section,
+            year=appointment.year,
+            reason=appointment.reason,
+            chosen_slot=chosen_slot,
+            faculty_id=appointment.faculty_id,
+            appointment_status="pending",
+            requested_time=now,
+            meeting_time=None,
+            created_at=now,
+            faculty_message=None
+        ).model_dump()
 
-    await db.appointments.insert_one(appointment_doc)
-    
+        appointment_doc.update({
+            "student_email": student_email,
+            "otp_session_id": otp_session["otp_id"],
+            "otp_verified": False,
+            "otp_expires_at": otp_session["expires_at"],
+        })
+
+        await db.appointments.insert_one(appointment_doc)
+    except Exception:
+        logger.exception(
+            "Appointment creation failed after OTP dispatch for faculty_id=%s student_email=%s",
+            appointment.faculty_id,
+            student_email,
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="OTP was sent, but the appointment could not be saved. Check the server logs.",
+        )
+
     return {
         "message": "OTP verification required.",
         "appointment_id": appointment_id,
