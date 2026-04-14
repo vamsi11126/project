@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Exam Papers Screenshot Placeholder</title>
+  <desc id="desc">Placeholder image for the exam papers module screenshot.</desc>
+  <rect width="1440" height="900" fill="#f4f7fb"/>
+  <rect x="70" y="60" width="1300" height="780" rx="28" fill="#ffffff" stroke="#d9e1ec" stroke-width="4"/>
+  <rect x="70" y="60" width="1300" height="72" rx="28" fill="#123b60"/>
+  <rect x="130" y="180" width="240" height="56" rx="14" fill="#e8eff8"/>
+  <rect x="400" y="180" width="240" height="56" rx="14" fill="#e8eff8"/>
+  <rect x="670" y="180" width="240" height="56" rx="14" fill="#e8eff8"/>
+  <rect x="940" y="180" width="180" height="56" rx="14" fill="#123b60"/>
+  <rect x="130" y="280" width="1120" height="420" rx="22" fill="#f9fbfd" stroke="#e2e8f0" stroke-width="3"/>
+  <rect x="170" y="330" width="320" height="140" rx="18" fill="#eef4fb"/>
+  <rect x="560" y="330" width="320" height="140" rx="18" fill="#eef4fb"/>
+  <rect x="950" y="330" width="260" height="140" rx="18" fill="#eef4fb"/>
+  <rect x="170" y="510" width="320" height="140" rx="18" fill="#eef4fb"/>
+  <rect x="560" y="510" width="320" height="140" rx="18" fill="#eef4fb"/>
+  <rect x="950" y="510" width="260" height="140" rx="18" fill="#eef4fb"/>
+  <text x="720" y="770" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" fill="#123b60">Replace With Live Papers Screen</text>
+  <text x="720" y="820" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#4d647d">Recommended capture: filters, paper cards, and pagination</text>
+</svg>

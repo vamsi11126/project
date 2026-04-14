@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Home Page Screenshot Placeholder</title>
+  <desc id="desc">Placeholder image for the Campus Toolkit landing page screenshot.</desc>
+  <rect width="1440" height="900" fill="#f3f6fb"/>
+  <rect x="80" y="70" width="1280" height="760" rx="28" fill="#ffffff" stroke="#d7deea" stroke-width="4"/>
+  <rect x="80" y="70" width="1280" height="68" rx="28" fill="#16324f"/>
+  <circle cx="130" cy="104" r="10" fill="#ff6b6b"/>
+  <circle cx="160" cy="104" r="10" fill="#ffd166"/>
+  <circle cx="190" cy="104" r="10" fill="#4ecdc4"/>
+  <rect x="130" y="190" width="520" height="48" rx="12" fill="#1f4b7a" opacity="0.12"/>
+  <rect x="130" y="260" width="460" height="24" rx="12" fill="#1f4b7a" opacity="0.1"/>
+  <rect x="130" y="300" width="500" height="24" rx="12" fill="#1f4b7a" opacity="0.08"/>
+  <rect x="130" y="370" width="180" height="52" rx="14" fill="#1f4b7a"/>
+  <rect x="330" y="370" width="180" height="52" rx="14" fill="#dbe7f5"/>
+  <rect x="780" y="190" width="470" height="300" rx="28" fill="#dfeaf7"/>
+  <rect x="130" y="500" width="1120" height="250" rx="24" fill="#f7f9fc" stroke="#e3e9f2" stroke-width="3"/>
+  <rect x="170" y="550" width="300" height="150" rx="20" fill="#eaf1f9"/>
+  <rect x="520" y="550" width="300" height="150" rx="20" fill="#eaf1f9"/>
+  <rect x="870" y="550" width="300" height="150" rx="20" fill="#eaf1f9"/>
+  <text x="720" y="455" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700" fill="#16324f">Replace With Live Home Page Screenshot</text>
+  <text x="720" y="510" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#49627d">Recommended capture: hero section plus feature cards</text>
+</svg>

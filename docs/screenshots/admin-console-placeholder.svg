@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Admin Console Screenshot Placeholder</title>
+  <desc id="desc">Placeholder image for the admin console screenshot.</desc>
+  <rect width="1440" height="900" fill="#f4f7fa"/>
+  <rect x="80" y="60" width="1280" height="780" rx="28" fill="#ffffff" stroke="#d8e0ea" stroke-width="4"/>
+  <rect x="80" y="60" width="1280" height="72" rx="28" fill="#101828"/>
+  <rect x="130" y="190" width="250" height="160" rx="20" fill="#1d4ed8"/>
+  <rect x="410" y="190" width="250" height="160" rx="20" fill="#0f766e"/>
+  <rect x="690" y="190" width="250" height="160" rx="20" fill="#d97706"/>
+  <rect x="970" y="190" width="250" height="160" rx="20" fill="#be123c"/>
+  <rect x="130" y="400" width="1090" height="300" rx="24" fill="#f8fafc" stroke="#e2e8f0" stroke-width="3"/>
+  <rect x="170" y="450" width="1020" height="58" rx="14" fill="#edf2f7"/>
+  <rect x="170" y="530" width="1020" height="58" rx="14" fill="#edf2f7"/>
+  <rect x="170" y="610" width="1020" height="58" rx="14" fill="#edf2f7"/>
+  <text x="720" y="780" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" fill="#101828">Replace With Live Admin Console Screenshot</text>
+  <text x="720" y="828" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#475467">Recommended capture: dashboard stats or Manage Papers table</text>
+</svg>

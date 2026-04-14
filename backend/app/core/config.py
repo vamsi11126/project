@@ -48,7 +48,15 @@ class Settings:
     SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "").strip()
     SMTP_FROM_EMAIL = os.getenv("SMTP_FROM_EMAIL", SMTP_USERNAME).strip()
     SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-
+    GMAIL_API_CLIENT_ID = os.getenv("GMAIL_API_CLIENT_ID", "").strip()
+    GMAIL_API_CLIENT_SECRET = os.getenv("GMAIL_API_CLIENT_SECRET", "").strip()
+    GMAIL_API_REFRESH_TOKEN = os.getenv("GMAIL_API_REFRESH_TOKEN", "").strip()
+    GMAIL_API_FROM_EMAIL = os.getenv("GMAIL_API_FROM_EMAIL", SMTP_FROM_EMAIL).strip()
+    GMAIL_API_TOKEN_URL = os.getenv("GMAIL_API_TOKEN_URL", "https://oauth2.googleapis.com/token").strip()
+    GMAIL_API_SEND_URL = os.getenv(
+        "GMAIL_API_SEND_URL",
+        "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+    ).strip()
     ADMIN_SESSION_COOKIE_NAME = os.getenv("ADMIN_SESSION_COOKIE_NAME", "admin_session")
     ADMIN_SESSION_COOKIE_SECURE = os.getenv("ADMIN_SESSION_COOKIE_SECURE", "false").lower() == "true"
     ADMIN_SESSION_COOKIE_SAMESITE = os.getenv("ADMIN_SESSION_COOKIE_SAMESITE", "lax").strip().lower()

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Appointment Flow Screenshot Placeholder</title>
+  <desc id="desc">Placeholder image for the appointment booking screenshot.</desc>
+  <rect width="1440" height="900" fill="#f6f8fc"/>
+  <rect x="80" y="60" width="1280" height="780" rx="28" fill="#ffffff" stroke="#dce4ef" stroke-width="4"/>
+  <rect x="80" y="60" width="1280" height="72" rx="28" fill="#5b3b7a"/>
+  <rect x="140" y="190" width="720" height="520" rx="24" fill="#fafbfd" stroke="#e4e9f2" stroke-width="3"/>
+  <rect x="900" y="190" width="300" height="320" rx="24" fill="#f3ecfb"/>
+  <rect x="180" y="250" width="280" height="42" rx="10" fill="#ebeef5"/>
+  <rect x="180" y="320" width="560" height="42" rx="10" fill="#ebeef5"/>
+  <rect x="180" y="390" width="560" height="42" rx="10" fill="#ebeef5"/>
+  <rect x="180" y="460" width="560" height="110" rx="16" fill="#ebeef5"/>
+  <rect x="180" y="610" width="220" height="54" rx="14" fill="#5b3b7a"/>
+  <text x="720" y="780" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" fill="#5b3b7a">Replace With Live Appointment Flow Screenshot</text>
+  <text x="720" y="828" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#6d5d7f">Recommended capture: booking form or OTP verification step</text>
+</svg>

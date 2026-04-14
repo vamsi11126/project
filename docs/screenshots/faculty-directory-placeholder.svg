@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
+  <title id="title">Faculty Directory Screenshot Placeholder</title>
+  <desc id="desc">Placeholder image for the faculty directory screenshot.</desc>
+  <rect width="1440" height="900" fill="#f5f8fb"/>
+  <rect x="80" y="70" width="1280" height="760" rx="28" fill="#ffffff" stroke="#d9e2ec" stroke-width="4"/>
+  <rect x="80" y="70" width="1280" height="72" rx="28" fill="#214e34"/>
+  <rect x="130" y="190" width="420" height="42" rx="12" fill="#214e34" opacity="0.12"/>
+  <rect x="130" y="250" width="520" height="24" rx="12" fill="#214e34" opacity="0.08"/>
+  <rect x="130" y="320" width="1120" height="410" rx="22" fill="#f9fbfd" stroke="#e3e9f1" stroke-width="3"/>
+  <rect x="170" y="360" width="300" height="300" rx="24" fill="#edf7f0"/>
+  <rect x="520" y="360" width="300" height="300" rx="24" fill="#edf7f0"/>
+  <rect x="870" y="360" width="300" height="300" rx="24" fill="#edf7f0"/>
+  <circle cx="320" cy="450" r="56" fill="#d4ead9"/>
+  <circle cx="670" cy="450" r="56" fill="#d4ead9"/>
+  <circle cx="1020" cy="450" r="56" fill="#d4ead9"/>
+  <text x="720" y="780" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" fill="#214e34">Replace With Live Faculty Directory Screenshot</text>
+  <text x="720" y="828" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#58715f">Recommended capture: public faculty cards after profile completion</text>
+</svg>
