@@ -7,7 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { FileText, Calculator, MessageSquare, GraduationCap, Menu } from "lucide-react";
+import {
+  FileText,
+  Calculator,
+  MessageSquare,
+  GraduationCap,
+  Menu,
+  Eye,
+  Users,
+  CalendarCheck2,
+  ArrowRight,
+} from "lucide-react";
 import { toast } from "sonner";
 import AdminLogin from "./admin/AdminLogin";
 import AdminDashboard from "./admin/AdminDashboard";
@@ -96,7 +106,7 @@ const Navigation = () => {
           <div className="nav-divider mx-2 h-6 border-l border-white/20 hidden md:block"></div>
           <Link 
             to="/faculty/login" 
-            className="nav-link faculty-portal-link bg-primary/20 rounded-lg px-4 font-semibold hover:bg-primary/40 transition-all border border-primary/30"
+            className={isActive("/faculty/login") ? "nav-link active" : "nav-link"}
             onClick={closeMenu}
           >
             Faculty Portal
@@ -108,26 +118,73 @@ const Navigation = () => {
 };
 
 const Home = () => {
+  const featureHighlights = [
+    {
+      icon: <Eye />,
+      title: "Preview Papers Instantly",
+      description: "Open previous year papers in a responsive modal before deciding to download.",
+    },
+    {
+      icon: <Users />,
+      title: "Browse Faculty Faster",
+      description: "Scan faculty cards, view profile details, and reach cabin information more quickly.",
+    },
+    {
+      icon: <CalendarCheck2 />,
+      title: "Book Appointments Smoothly",
+      description: "Move from faculty discovery to appointment booking in a cleaner student flow.",
+    },
+  ];
+
   return (
     <div className="page-container">
       <div className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title" data-testid="hero-title">Your Academic Success Hub</h1>
+          <div className="hero-badge">Student toolkit, upgraded</div>
+          <h1 className="hero-title" data-testid="hero-title">Study smarter with papers, faculty access, and quick academic tools in one place.</h1>
           <p className="hero-subtitle" data-testid="hero-subtitle">
-            Access exam papers, track attendance, and request resources - all in one place
+            Preview question papers before downloading, track attendance shortage instantly, explore faculty profiles, and request missing resources without hopping across multiple pages.
           </p>
           <div className="hero-buttons">
             <Link to="/papers">
               <Button size="lg" className="hero-btn primary" data-testid="hero-papers-btn">
                 <FileText className="btn-icon" />
-                Browse Papers
+                Explore Papers
               </Button>
             </Link>
+            <Link to="/faculty">
+              <Button size="lg" className="hero-btn secondary">
+                <Users className="btn-icon" />
+                Find Faculty
+              </Button>
+            </Link>
+          </div>
+          <div className="hero-mini-grid">
+            <div className="hero-mini-card">
+              <span className="hero-mini-label">New</span>
+              <p>Paper preview now opens inside the site.</p>
+            </div>
+            <div className="hero-mini-card">
+              <span className="hero-mini-label">Better</span>
+              <p>Faculty cards are cleaner and easier to scan.</p>
+            </div>
           </div>
         </div>
         <div className="hero-image">
           <img src="https://images.unsplash.com/photo-1620829813573-7c9e1877706f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1Nzh8MHwxfHNlYXJjaHwyfHxzdHVkZW50JTIwc3R1ZHlpbmclMjBsYXB0b3B8ZW58MHx8fHwxNzYzNzk5MjY3fDA&ixlib=rb-4.1.0&q=85" alt="Student studying" data-testid="hero-image" />
         </div>
+      </div>
+
+      <div className="home-highlights">
+        {featureHighlights.map((item) => (
+          <div key={item.title} className="highlight-card">
+            <div className="highlight-icon">{item.icon}</div>
+            <div className="highlight-copy">
+              <h3>{item.title}</h3>
+              <p>{item.description}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="features-section">
@@ -140,7 +197,7 @@ const Home = () => {
                   <FileText />
                 </div>
                 <CardTitle>Exam Papers</CardTitle>
-                <CardDescription>Browse previous year question papers by department and subject</CardDescription>
+                <CardDescription>Filter, preview, and download previous year question papers by department and subject.</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -152,6 +209,17 @@ const Home = () => {
                 </div>
                 <CardTitle>Attendance Calculator</CardTitle>
                 <CardDescription>Check whether you have an attendance shortage and how many classes you need</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+          <Link to="/faculty" className="feature-card-link">
+            <Card className="feature-card" data-testid="feature-faculty">
+              <CardHeader>
+                <div className="feature-icon faculty">
+                  <Users />
+                </div>
+                <CardTitle>Faculty Directory</CardTitle>
+                <CardDescription>Browse faculty cards, open profiles, and move into appointment booking smoothly.</CardDescription>
               </CardHeader>
             </Card>
           </Link>
@@ -167,6 +235,17 @@ const Home = () => {
             </Card>
           </Link>
         </div>
+      </div>
+
+      <div className="cta-strip">
+        <div>
+          <p className="cta-eyebrow">For faculty</p>
+          <h2>Access your dashboard with the same clean flow as the rest of the site.</h2>
+        </div>
+        <Link to="/faculty/login" className="cta-link">
+          Open Faculty Portal
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

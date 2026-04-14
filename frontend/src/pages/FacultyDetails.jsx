@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import axios from "axios";
-import { ArrowLeft, CalendarCheck2, MapPin, LayoutDashboard } from "lucide-react";
+import { ArrowLeft, CalendarCheck2, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { API } from "@/lib/api";
@@ -121,12 +121,6 @@ export default function FacultyDetails() {
                     <Button className="h-11 w-full gap-2 rounded-lg bg-sky-600 text-white hover:bg-sky-700 sm:w-auto">
                       <CalendarCheck2 className="h-4 w-4" />
                       Book Appointment
-                    </Button>
-                  </Link>
-                  <Link to={`/faculty/${facultyId}/dashboard`}>
-                    <Button variant="outline" className="h-11 w-full gap-2 rounded-lg sm:w-auto">
-                      <LayoutDashboard className="h-4 w-4" />
-                      Manage Appointments
                     </Button>
                   </Link>
                 </div>
