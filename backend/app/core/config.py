@@ -11,16 +11,29 @@ def _split_csv(value: str) -> list[str]:
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def _get_env(*names: str, default: str = "") -> str:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return default
+
+
 class Settings:
     MONGO_URI = os.getenv("MONGO_URI")
     DB_NAME = os.getenv("DB_NAME", "toolkit_db")
     JWT_SECRET = os.getenv("JWT_SECRET", "supersecret-donotusetransportlayer")
     FRONTEND_ORIGINS = _split_csv(
-        os.getenv(
+        _get_env(
             "FRONTEND_ORIGINS",
+            "CORS_ORIGINS",
             "http://localhost:3000,http://127.0.0.1:3000",
         )
     )
+    FRONTEND_ORIGIN_REGEX = _get_env(
+        "FRONTEND_ORIGIN_REGEX",
+        "CORS_ORIGIN_REGEX",
+    ).strip() or None
 
     OTP_DEBUG_MODE = os.getenv("OTP_DEBUG_MODE", "true").lower() == "true"
     OTP_TTL_MINUTES = int(os.getenv("OTP_TTL_MINUTES", "10"))
